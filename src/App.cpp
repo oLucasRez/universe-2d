@@ -104,6 +104,10 @@ int main(void)
 
 	if (!glfwInit()) return -1;
 
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
 	window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
 	if (!window)
 	{
@@ -132,20 +136,17 @@ int main(void)
 		2, 3, 0
 	};
 
+	unsigned int vao;
+	glCall(glGenVertexArrays(1, &vao));
+	glCall(glBindVertexArray(vao));
+
 	unsigned int buffer;
 	glCall(glGenBuffers(1, &buffer));
 	glCall(glBindBuffer(GL_ARRAY_BUFFER, buffer));
 	glCall(glBufferData(
 		GL_ARRAY_BUFFER, 8 * sizeof(float), positions, GL_STATIC_DRAW));
 
-	glCall(glEnableVertexAttribArray(0));// habilita o atributo 0 do vertex
-	// glVertexAttribPointer params
-	// index ~> índice do atributo do vertex
-	// size ~> número de valores que definirão o vector
-	// type ~> tipo de dado q fornecerá
-	// normalized ~> informa se o valor se encontra normalizado
-	// stride ~> tamanho do atributo em bytes
-	// pointer ~> offset do atributo em relação ao proprio vertex
+	glCall(glEnableVertexAttribArray(0));
 	glCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0));
 
 	unsigned int ibo;
@@ -160,9 +161,12 @@ int main(void)
 
 	glCall(int location = glGetUniformLocation(shader, "uColor"));
 	ASSERT(location != -1)
-	glCall(glUniform4f(location, 0.8f, 0.4f, 0.2f, 1.0f));
+		glCall(glUniform4f(location, 0.8f, 0.4f, 0.2f, 1.0f));
 
+	glCall(glBindVertexArray(0));
+	glCall(glUseProgram(0));
 	glCall(glBindBuffer(GL_ARRAY_BUFFER, 0));
+	glCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
 
 	float r = 0.0f;
 	float i = 0.05f;
@@ -171,7 +175,12 @@ int main(void)
 	{
 		glCall(glClear(GL_COLOR_BUFFER_BIT));
 
+		glCall(glUseProgram(shader));
 		glCall(glUniform4f(location, r, 0.4f, 0.2f, 1.0f));
+
+		glCall(glBindVertexArray(vao));
+		glCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo));
+
 		glCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
 
 		if (r > 1.0f) i = -0.05f;
