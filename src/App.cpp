@@ -10,6 +10,7 @@
 
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
+#include "VertexArray.h"
 
 struct ShaderProgramSource {
 	std::string VertexSource;
@@ -128,10 +129,12 @@ int main(void)
 		glCall(glGenVertexArrays(1, &vao));
 		glCall(glBindVertexArray(vao));
 
+		VertexArray va;
 		VertexBuffer vb(positions, 8 * sizeof(float));
 
-		glCall(glEnableVertexAttribArray(0));
-		glCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0));
+		VertexBufferLayout layout;
+		layout.Push<float>(2);
+		va.AddBuffer(vb, layout);
 
 		IndexBuffer ib(indices, 6);
 
@@ -158,13 +161,13 @@ int main(void)
 			glCall(glUseProgram(shader));
 			glCall(glUniform4f(location, r, 0.4f, 0.2f, 1.0f));
 
-			glCall(glBindVertexArray(vao));
+			va.Bind();
 			ib.Bind();
 
 			glCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
 
 			if (r > 1.0f) i = -0.05f;
-			else if (r < 0.0f) i = 0.05;
+			else if (r < 0.0f) i = 0.05f;
 
 			r += i;
 
