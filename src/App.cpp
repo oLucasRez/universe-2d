@@ -13,6 +13,7 @@
 #include "IndexBuffer.h"
 #include "VertexArray.h"
 #include "Shader.h"
+#include "Texture.h"
 
 int main(void)
 {
@@ -40,10 +41,10 @@ int main(void)
 	std::cout << glGetString(GL_VERSION) << std::endl;
 	{
 		float positions[] = {
-			-0.5f, -0.5f,
-			0.5f, -0.5f,
-			0.5f, 0.5f,
-			-0.5f, 0.5f,
+			-0.5f, -0.5f, 0.0f, 0.0f,
+			0.5f, -0.5f, 1.0f, 0.0f,
+			0.5f, 0.5f, 1.0f, 1.0f,
+			-0.5f, 0.5f, 0.0f, 1.0f,
 		};
 
 		unsigned int indices[] = {
@@ -51,14 +52,14 @@ int main(void)
 			2, 3, 0
 		};
 
-		unsigned int vao;
-		glCall(glGenVertexArrays(1, &vao));
-		glCall(glBindVertexArray(vao));
+		glCall(glEnable(GL_BLEND));
+		glCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
 		VertexArray va;
-		VertexBuffer vb(positions, 8 * sizeof(float));
+		VertexBuffer vb(positions, 4 * 4 * sizeof(float));
 
 		VertexBufferLayout layout;
+		layout.Push<float>(2);
 		layout.Push<float>(2);
 		va.AddBuffer(vb, layout);
 
@@ -66,7 +67,11 @@ int main(void)
 
 		Shader shader("res/shaders/Basic.shader");
 		shader.Bind();
-		shader.SetUniform4f("uColor", 0.8f, 0.4f, 0.2f, 1.0f);
+		shader.SetUniform4f("u_Color", 0.8f, 0.4f, 0.2f, 1.0f);
+
+		Texture texture("res/textures/LogoMacropus.png");
+		texture.Bind();
+		shader.SetUniform1i("u_Texture", 0);
 
 		va.Unbind();
 		vb.Unbind();
@@ -83,7 +88,7 @@ int main(void)
 			renderer.Clear();
 
 			shader.Bind();
-			shader.SetUniform4f("uColor", r, 0.4f, 0.2f, 1.0f);
+			shader.SetUniform4f("u_Color", r, 0.4f, 0.2f, 1.0f);
 
 			renderer.Draw(va, ib, shader);
 
