@@ -9,6 +9,7 @@
 #include "Renderer.h"
 
 #include "VertexBuffer.h"
+#include "VertexBufferLayout.h"
 #include "IndexBuffer.h"
 #include "VertexArray.h"
 #include "Shader.h"
@@ -38,7 +39,6 @@ int main(void)
 
 	std::cout << glGetString(GL_VERSION) << std::endl;
 	{
-		// positions contem informações de 3 vertex (2 floats por vertex)
 		float positions[] = {
 			-0.5f, -0.5f,
 			0.5f, -0.5f,
@@ -73,20 +73,19 @@ int main(void)
 		ib.Unbind();
 		shader.Unbind();
 
+		Renderer renderer;
+
 		float r = 0.0f;
 		float i = 0.05f;
 		// loop eterno até que se feche a janela
 		while (!glfwWindowShouldClose(window))
 		{
-			glCall(glClear(GL_COLOR_BUFFER_BIT));
+			renderer.Clear();
 
 			shader.Bind();
 			shader.SetUniform4f("uColor", r, 0.4f, 0.2f, 1.0f);
 
-			va.Bind();
-			ib.Bind();
-
-			glCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
+			renderer.Draw(va, ib, shader);
 
 			if (r > 1.0f) i = -0.05f;
 			else if (r < 0.0f) i = 0.05f;
